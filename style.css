@@ -1,0 +1,76 @@
+body {
+    background-color: hsl(0deg 0% 96%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    height: 100vh;
+    font-size: 1.3rem;
+    font-family: "Roboto", sans-serif;
+}
+
+#calculator {
+    background-color: #aaa;
+    height: min(600px, 80vh);
+    width: min(380px, 40vw);
+    border-radius: 10px;
+    border: 2px solid black;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px
+}
+
+#screen {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-around;
+    background-color: hsl(0deg 0% 93%);
+    border: 2px solid black;
+    border-radius: 10px;
+    grid-column: 1 / 5;
+    grid-row: 1 / 3;
+    margin-bottom: 30px;
+}
+
+#screen p {
+    margin-right: 0.5em;
+}
+
+#low-line {
+    font-size:2em;
+    text-align: right;
+}
+
+#clear {
+    grid-column: 1 / 3;
+    background-color: hsl(0deg 100% 83%);
+}
+
+#clear:hover {
+    background-color: hsl(0deg 100% 76%);
+}
+
+#delete {
+    grid-column: 3 / 5;
+    background-color: hsl(240, 100%, 83%);
+}
+
+#delete:hover {
+    background-color: hsl(240, 100%, 76%);
+}
+
+button {
+    color: black;
+    background-color: hsl(0deg 0% 93%);
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: inherit;
+}
+
+button:hover {
+    cursor: pointer;
+    background-color: hsl(0deg 0% 76%);
+}
