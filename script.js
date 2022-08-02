@@ -197,6 +197,8 @@ function divisionByZeroHandler(e) {
         displayLowLine.textContent = "Invalid operation: divide by 0";
         inErrorState = true;
     }
+
+    displayLowLine.textContent = getNumberWithoutOverflow(+displayLowLine.textContent);
 }
 
 function errorResetHandler(e) {
