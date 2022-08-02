@@ -33,8 +33,11 @@ function operate(operator, a, b) {
 const digits = document.querySelectorAll('.digit');
 const clearButton = document.querySelector("#clear");
 const deleteButton = document.querySelector("#delete");
+const screen = document.querySelector("#screen");
 const displayHighLine = document.querySelector("#high-line");
 const displayLowLine = document.querySelector("#low-line");
+
+const maxDigitStorage = getMaximumDigitStorage(screen, displayLowLine);
 
 digits.forEach(digitButton => digitButton.addEventListener("click", digitEventListener));
 
@@ -67,11 +70,6 @@ const equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", equalsEventListener);
 
 function digitEventListener(e) {
-    // handle initial 0 at the display
-    if (displayLowLine.textContent == 0) {
-        displayLowLine.textContent = '';
-    }
-
     if (!isDigitLastButtonPressed) {
         displayLowLine.textContent = '';
         isDigitLastButtonPressed = true;
@@ -82,19 +80,20 @@ function digitEventListener(e) {
         displayHighLine.textContent = '';
     }
 
-    displayLowLine.textContent = displayLowLine.textContent + e.target.textContent;
+    let updatedNumber = Number(displayLowLine.textContent) + e.target.textContent;
+    displayLowLine.textContent = getNumberWithoutOverflow(updatedNumber);
 }
 
 function operatorEventListener(e) {
     if (operator && isDigitLastButtonPressed) {
         secondOperand = displayLowLine.textContent;
-        displayLowLine.textContent = operate(operator, firstOperand, secondOperand);
+        displayLowLine.textContent = getResultWithoutOverflow(operator, firstOperand, secondOperand);
     }
 
     firstOperand = +displayLowLine.textContent;
     secondOperand = firstOperand;
     operator = e.target.textContent;
-    displayHighLine.textContent = `${firstOperand} ${operator}`;
+    displayHighLine.textContent = `${getNumberWithoutOverflow(firstOperand)} ${operator}`;
     isDigitLastButtonPressed = false;
 }
 
@@ -104,13 +103,56 @@ function equalsEventListener(e) {
     }
 
     if (isDigitLastButtonPressed) {
-        secondOperand = displayLowLine.textContent;
+        secondOperand = Number(displayLowLine.textContent);
     }
     
-    let result = operate(operator, firstOperand, secondOperand);
-    displayHighLine.textContent = `${firstOperand} ${operator} ${secondOperand} =`
-    firstOperand = result;
+    let result = getResultWithoutOverflow(operator, firstOperand, secondOperand);
+    displayHighLine.textContent = `${getNumberWithoutOverflow(firstOperand)} ${operator} ${getNumberWithoutOverflow(secondOperand)} =`
+    firstOperand = Number(result);
     displayLowLine.textContent = result;
     isDigitLastButtonPressed = false;
 }
 
+function isOverflown(element) {
+    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+  }
+
+function getMaximumDigitStorage(screen, line) {
+    while (!isOverflown(screen)) {
+        line.textContent += '8';
+    }
+
+    let maxLineLength = line.textContent.length - 2;
+    line.textContent = '0';
+    return maxLineLength;
+}
+
+function getResultWithoutOverflow(operator, firstOperand, secondOperand) {
+    let result = operate(operator, firstOperand, secondOperand);
+    return getNumberWithoutOverflow(result); 
+}
+
+function getNumberWithoutOverflow(number) {
+    number = String(number);
+    if (!isNumberOverflowing(number)) {
+        return number[0] === '0' ? number.slice(1) : number;
+    }
+
+    // magic number explanation:
+    // as first guess it is expected that
+    // e+{digit} should work without overflow
+    let fractionDigitsCount = maxDigitStorage - 3;
+    let numberAsExponential = number;
+    
+    while (isNumberOverflowing(numberAsExponential)) {
+        numberAsExponential = Number.parseFloat(numberAsExponential).toExponential(fractionDigitsCount);
+        fractionDigitsCount--;
+    }
+
+    return numberAsExponential;
+}
+
+function isNumberOverflowing(number) {
+    number = String(number);
+    return number.length > maxDigitStorage;
+}
