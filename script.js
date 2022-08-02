@@ -57,6 +57,15 @@ operatorButtons.forEach(operatorButton => operatorButton.addEventListener("click
 const equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", equalsEventListener);
 
+// keyboard support
+let buttonsMapping = {}
+const buttons = document.querySelectorAll("button");
+buttons.forEach(button => buttonsMapping[button.textContent] = button);
+buttonsMapping['*'] = buttonsMapping['×'];
+buttonsMapping['x'] = buttonsMapping['×'];
+buttonsMapping['/'] = buttonsMapping['÷'];
+document.addEventListener("keydown", handleKeyboardClick);
+
 // handle division by zero
 let inErrorState = false;
 let previousOperator;
@@ -198,7 +207,7 @@ function divisionByZeroHandler(e) {
         inErrorState = true;
     }
 
-    displayLowLine.textContent = getNumberWithoutOverflow(+displayLowLine.textContent);
+    displayLowLine.textContent = getNumberWithoutOverflow(displayLowLine.textContent);
 }
 
 function errorResetHandler(e) {
@@ -213,4 +222,11 @@ function errorResetHandler(e) {
 
 function getStringWithoutCharAt(string, index) {
     return string.slice(0, index) + string.slice(index + 1);
+}
+
+function handleKeyboardClick(e) {
+    let elementClickedViaKeyboard = buttonsMapping[e.key];
+    if (elementClickedViaKeyboard) {
+        elementClickedViaKeyboard.click();
+    }
 }
