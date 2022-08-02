@@ -99,7 +99,14 @@ function digitEventListener(e) {
         displayHighLine.textContent = '';
     }
 
-    let updatedNumber = Number(displayLowLine.textContent) + e.target.textContent;
+    let updatedNumber;
+
+    if (displayLowLine.textContent.includes('.')) {
+        updatedNumber = displayLowLine.textContent + e.target.textContent;
+    } else {
+        updatedNumber = Number(displayLowLine.textContent) + e.target.textContent;
+    }
+
     displayLowLine.textContent = getNumberWithoutOverflow(updatedNumber);
 }
 
@@ -191,5 +198,9 @@ function divisionByZeroHandler(e) {
 function errorResetHandler(e) {
     if (inErrorState) {
         clearEventListener(e);
+    }
+
+    if ((displayLowLine.textContent.includes('.') || displayLowLine.textContent.includes('e')) && e.target.textContent === '.') {
+        e.stopPropagation();
     }
 }
