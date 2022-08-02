@@ -77,15 +77,19 @@ function clearEventListener(e) {
 };
 
 function deleteEventListener(e) {
-    if (displayLowLine.textContent == 0) {
+    if (displayLowLine.textContent.length == 1) {
+        displayLowLine.textContent = 0;
+        return;
+    }
+
+    // support scientific notation
+    if (displayLowLine.textContent.includes('e')) {
+        displayLowLine.textContent = getStringWithoutCharAt(displayLowLine.textContent, displayLowLine.textContent.indexOf('e') - 1);
         return;
     }
 
     displayLowLine.textContent = displayLowLine.textContent.slice(0, -1);
 
-    if (displayLowLine.textContent === '') {
-        displayLowLine.textContent = 0;
-    }
 }
 
 function digitEventListener(e) {
@@ -203,4 +207,8 @@ function errorResetHandler(e) {
     if ((displayLowLine.textContent.includes('.') || displayLowLine.textContent.includes('e')) && e.target.textContent === '.') {
         e.stopPropagation();
     }
+}
+
+function getStringWithoutCharAt(string, index) {
+    return string.slice(0, index) + string.slice(index + 1);
 }
