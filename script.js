@@ -37,28 +37,16 @@ const screen = document.querySelector("#screen");
 const displayHighLine = document.querySelector("#high-line");
 const displayLowLine = document.querySelector("#low-line");
 
+const hightLineFontSize = displayHighLine.style.fontSize;
+const lowLineFontSize = displayLowLine.style.fontSize;
+
 const maxDigitStorage = getMaximumDigitStorage(screen, displayLowLine);
 
 digits.forEach(digitButton => digitButton.addEventListener("click", digitEventListener));
 
-clearButton.addEventListener("click", e => {
-    displayHighLine.textContent = '';
-    displayLowLine.textContent = '0';
-    operator = '';
-    isDigitLastButtonPressed = false;
-});
+clearButton.addEventListener("click", clearEventListener);
 
-deleteButton.addEventListener("click", e => {
-    if (displayLowLine.textContent == 0) {
-        return;
-    }
-
-    displayLowLine.textContent = displayLowLine.textContent.slice(0, -1);
-
-    if (displayLowLine.textContent === '') {
-        displayLowLine.textContent = 0;
-    }
-});
+deleteButton.addEventListener("click", deleteEventListener);
 
 let firstOperand, secondOperand, operator;
 let isDigitLastButtonPressed = false;
@@ -68,6 +56,37 @@ operatorButtons.forEach(operatorButton => operatorButton.addEventListener("click
 
 const equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", equalsEventListener);
+
+// handle division by zero
+let inErrorState = false;
+let previousOperator;
+let previousSecondOperand;
+document.addEventListener("click", divisionByZeroHandler, {capture: false});
+document.addEventListener("click", errorResetHandler, {capture: true});
+
+function clearEventListener(e) {
+    previousOperator = null;
+    previousSecondOperand = null;
+    inErrorState = false;
+    displayHighLine.textContent = '';
+    displayLowLine.style.fontSize = lowLineFontSize;
+    firstOperand = 0;
+    displayLowLine.textContent = '0';
+    operator = '';
+    isDigitLastButtonPressed = false;
+};
+
+function deleteEventListener(e) {
+    if (displayLowLine.textContent == 0) {
+        return;
+    }
+
+    displayLowLine.textContent = displayLowLine.textContent.slice(0, -1);
+
+    if (displayLowLine.textContent === '') {
+        displayLowLine.textContent = 0;
+    }
+}
 
 function digitEventListener(e) {
     if (!isDigitLastButtonPressed) {
@@ -128,6 +147,9 @@ function getMaximumDigitStorage(screen, line) {
 }
 
 function getResultWithoutOverflow(operator, firstOperand, secondOperand) {
+    previousOperator = operator;
+    previousSecondOperand = secondOperand;
+    
     let result = operate(operator, firstOperand, secondOperand);
     return getNumberWithoutOverflow(result); 
 }
@@ -135,7 +157,7 @@ function getResultWithoutOverflow(operator, firstOperand, secondOperand) {
 function getNumberWithoutOverflow(number) {
     number = String(number);
     if (!isNumberOverflowing(number)) {
-        return number[0] === '0' ? number.slice(1) : number;
+        return number[0] === '0' && number.length > 1 ? number.slice(1) : number;
     }
 
     // magic number explanation:
@@ -155,4 +177,19 @@ function getNumberWithoutOverflow(number) {
 function isNumberOverflowing(number) {
     number = String(number);
     return number.length > maxDigitStorage;
+}
+
+function divisionByZeroHandler(e) {
+    if (previousOperator === "÷" && previousSecondOperand == 0) {
+        displayHighLine.textContent = '';
+        displayLowLine.style.fontSize = "26px";
+        displayLowLine.textContent = "Invalid operation: divide by 0";
+        inErrorState = true;
+    }
+}
+
+function errorResetHandler(e) {
+    if (inErrorState) {
+        clearEventListener(e);
+    }
 }
